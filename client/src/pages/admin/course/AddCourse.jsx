@@ -20,26 +20,41 @@ const AddCourse = () => {
   const [courseTitle, setCourseTitle] = useState("");
   const [category, setCategory] = useState("");
 
-  const [createCourse, { data, isLoading, error, isSuccess }] =
+  const [createCourse, { data, isLoading, isSuccess, error }] =
     useCreateCourseMutation();
 
   const navigate = useNavigate();
 
-  const getSelectedCategory = (value) => {
-    setCategory(value);
-  };
-
   const createCourseHandler = async () => {
-    await createCourse({ courseTitle, category });
+    // ✅ FRONTEND VALIDATION
+    if (!courseTitle.trim()) {
+      toast.error("Course title is required");
+      return;
+    }
+
+    if (!category) {
+      toast.error("Category is required");
+      return;
+    }
+
+    try {
+      await createCourse({ courseTitle, category }).unwrap();
+    } catch (_) {
+      // handled by useEffect
+    }
   };
 
-  // for displaying toast
-  useEffect(()=>{
-    if(isSuccess){
-        toast.success(data?.message || "Course created.");
-        navigate("/admin/course");
+  // ✅ SUCCESS / ERROR HANDLING
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data?.message || "Course created successfully");
+      navigate("/admin/course");
     }
-  },[isSuccess, error])
+
+    if (error) {
+      toast.error(error?.data?.message || "Failed to create course");
+    }
+  }, [isSuccess, error, data, navigate]);
 
   return (
     <div className="flex-1 mx-10">
@@ -48,10 +63,10 @@ const AddCourse = () => {
           Lets add course, add some basic course details for your new course
         </h1>
         <p className="text-sm">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus,
-          laborum!
+          Fill the title and category to create a new course.
         </p>
       </div>
+
       <div className="space-y-4">
         <div>
           <Label>Title</Label>
@@ -62,10 +77,11 @@ const AddCourse = () => {
             placeholder="Your Course Name"
           />
         </div>
+
         <div>
           <Label>Category</Label>
-          <Select onValueChange={getSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>
@@ -91,10 +107,12 @@ const AddCourse = () => {
             </SelectContent>
           </Select>
         </div>
+
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate("/admin/course")}>
             Back
           </Button>
+
           <Button disabled={isLoading} onClick={createCourseHandler}>
             {isLoading ? (
               <>

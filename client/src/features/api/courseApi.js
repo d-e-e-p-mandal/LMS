@@ -4,124 +4,149 @@ const COURSE_API = "http://localhost:8080/api/v1/course";
 
 export const courseApi = createApi({
   reducerPath: "courseApi",
-  tagTypes: ["Refetch_Creator_Course", "Refetch_Lecture"],
   baseQuery: fetchBaseQuery({
     baseUrl: COURSE_API,
-    credentials: "include",
+    credentials: "include", // ✅ required for cookies
   }),
+
+  tagTypes: [
+    "CreatorCourse",
+    "Course",
+    "Lecture",
+    "PublishedCourse",
+  ],
+
   endpoints: (builder) => ({
+
+    /* ================= CREATE COURSE ================= */
     createCourse: builder.mutation({
       query: ({ courseTitle, category }) => ({
-        url: "",
+        url: "/",
         method: "POST",
         body: { courseTitle, category },
       }),
-      invalidatesTags: ["Refetch_Creator_Course"],
+      invalidatesTags: ["CreatorCourse"],
     }),
-    getSearchCourse:builder.query({
-      query: ({searchQuery, categories, sortByPrice}) => {
-        // Build qiery string
-        let queryString = `/search?query=${encodeURIComponent(searchQuery)}`
 
-        // append cateogry 
-        if(categories && categories.length > 0) {
-          const categoriesString = categories.map(encodeURIComponent).join(",");
-          queryString += `&categories=${categoriesString}`; 
-        }
-
-        // Append sortByPrice is available
-        if(sortByPrice){
-          queryString += `&sortByPrice=${encodeURIComponent(sortByPrice)}`; 
-        }
-
-        return {
-          url:queryString,
-          method:"GET", 
-        }
-      }
+    /* ================= SEARCH COURSE ================= */
+    getSearchCourse: builder.query({
+      query: ({ searchQuery, categories, sortByPrice }) => {
+        const params = new URLSearchParams();
+        if (searchQuery) params.append("query", searchQuery);
+        if (categories?.length) params.append("categories", categories.join(","));
+        if (sortByPrice) params.append("sortByPrice", sortByPrice);
+        return `/search?${params.toString()}`;
+      },
     }),
+
+    /* ================= PUBLISHED COURSES ================= */
     getPublishedCourse: builder.query({
-      query: () => ({
-        url: "/published-courses",
-        method: "GET",
-      }),
+      query: () => "/published-courses",
+      providesTags: ["PublishedCourse"],
     }),
+
+    /* ================= CREATOR COURSES ================= */
     getCreatorCourse: builder.query({
-      query: () => ({
-        url: "",
-        method: "GET",
-      }),
-      providesTags: ["Refetch_Creator_Course"],
+      query: () => "/",
+      providesTags: ["CreatorCourse"],
     }),
+
+    /* ================= COURSE BY ID ================= */
+    getCourseById: builder.query({
+      query: (courseId) => `/${courseId}`,
+      providesTags: (r, e, courseId) => [
+        { type: "Course", id: courseId },
+      ],
+    }),
+
+    /* ================= EDIT COURSE ================= */
     editCourse: builder.mutation({
-      query: ({ formData, courseId }) => ({
+      query: ({ courseId, formData }) => ({
         url: `/${courseId}`,
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: ["Refetch_Creator_Course"],
+      invalidatesTags: (r, e, { courseId }) => [
+        "CreatorCourse",
+        "PublishedCourse",
+        { type: "Course", id: courseId },
+      ],
     }),
-    getCourseById: builder.query({
-      query: (courseId) => ({
-        url: `/${courseId}`,
-        method: "GET",
-      }),
-    }),
+
+    /* ================= CREATE LECTURE ================= */
     createLecture: builder.mutation({
-      query: ({ lectureTitle, courseId }) => ({
+      query: ({ courseId, lectureTitle }) => ({
         url: `/${courseId}/lecture`,
         method: "POST",
         body: { lectureTitle },
       }),
+      invalidatesTags: (r, e, { courseId }) => [
+        { type: "Lecture", id: courseId },
+        { type: "Course", id: courseId },
+      ],
     }),
+
+    /* ================= GET LECTURES ================= */
     getCourseLecture: builder.query({
-      query: (courseId) => ({
-        url: `/${courseId}/lecture`,
-        method: "GET",
-      }),
-      providesTags: ["Refetch_Lecture"],
+      query: (courseId) => `/${courseId}/lecture`,
+      providesTags: (r, e, courseId) => [
+        { type: "Lecture", id: courseId },
+      ],
     }),
+
+    /* ================= EDIT LECTURE ================= */
     editLecture: builder.mutation({
-      query: ({
-        lectureTitle,
-        videoInfo,
-        isPreviewFree,
-        courseId,
-        lectureId,
-      }) => ({
+      query: ({ courseId, lectureId, formData }) => ({
         url: `/${courseId}/lecture/${lectureId}`,
-        method: "POST",
-        body: { lectureTitle, videoInfo, isPreviewFree },
+        method: "PUT",
+        body: formData, // ✅ FormData (video)
       }),
+      invalidatesTags: (r, e, { courseId, lectureId }) => [
+        { type: "Lecture", id: courseId },
+        { type: "Course", id: courseId },
+        { type: "Lecture", id: lectureId },
+      ],
     }),
+
+    /* ================= DELETE LECTURE ================= */
     removeLecture: builder.mutation({
       query: (lectureId) => ({
         url: `/lecture/${lectureId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Refetch_Lecture"],
+      invalidatesTags: ["Lecture"],
     }),
+
+    /* ================= LECTURE BY ID ================= */
     getLectureById: builder.query({
-      query: (lectureId) => ({
-        url: `/lecture/${lectureId}`,
-        method: "GET",
-      }),
+      query: (lectureId) => `/lecture/${lectureId}`,
+      providesTags: (r, e, lectureId) => [
+        { type: "Lecture", id: lectureId },
+      ],
     }),
+
+    /* ================= PUBLISH / UNPUBLISH ================= */
     publishCourse: builder.mutation({
-      query: ({ courseId, query }) => ({
-        url: `/${courseId}?publish=${query}`,
+      query: ({ courseId, publish }) => ({
+        url: `/${courseId}?publish=${publish}`,
         method: "PATCH",
       }),
+      invalidatesTags: (r, e, { courseId }) => [
+        "CreatorCourse",
+        "PublishedCourse",
+        { type: "Course", id: courseId },
+      ],
     }),
   }),
 });
+
 export const {
   useCreateCourseMutation,
   useGetSearchCourseQuery,
   useGetPublishedCourseQuery,
   useGetCreatorCourseQuery,
-  useEditCourseMutation,
   useGetCourseByIdQuery,
+  useEditCourseMutation,
   useCreateLectureMutation,
   useGetCourseLectureQuery,
   useEditLectureMutation,

@@ -1,38 +1,47 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const COURSE_PURCHASE_API = "http://localhost:8080/api/v1/purchase";
+const PURCHASE_API = "http://localhost:8080/api/v1/purchase/";
 
 export const purchaseApi = createApi({
   reducerPath: "purchaseApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: COURSE_PURCHASE_API,
+    baseUrl: PURCHASE_API,
     credentials: "include",
   }),
+  tagTypes: ["Purchases"],
+
   endpoints: (builder) => ({
+    // ================= CREATE CHECKOUT SESSION =================
     createCheckoutSession: builder.mutation({
       query: (courseId) => ({
-        url: "/checkout/create-checkout-session",
+        url: "checkout/create-checkout-session",
         method: "POST",
         body: { courseId },
       }),
     }),
+
+    // ================= GET PURCHASED COURSES =================
+    getPurchasedCourses: builder.query({
+      query: () => ({
+        url: "/",
+        method: "GET",
+      }),
+      providesTags: ["Purchases"],
+    }),
+
+    // ================= GET COURSE DETAIL (With Purchase Status) =================
     getCourseDetailWithStatus: builder.query({
       query: (courseId) => ({
         url: `/course/${courseId}/detail-with-status`,
         method: "GET",
       }),
-    }),
-    getPurchasedCourses: builder.query({
-      query: () => ({
-        url: `/`,
-        method: "GET",
-      }),
+      providesTags: ["Purchases"],
     }),
   }),
 });
 
 export const {
   useCreateCheckoutSessionMutation,
-  useGetCourseDetailWithStatusQuery,
   useGetPurchasedCoursesQuery,
+  useGetCourseDetailWithStatusQuery,
 } = purchaseApi;

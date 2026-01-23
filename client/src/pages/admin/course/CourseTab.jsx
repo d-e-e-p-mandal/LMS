@@ -105,15 +105,19 @@ const CourseTab = () => {
 
   const publishStatusHandler = async (action) => {
     try {
-      const response = await publishCourse({courseId, query:action});
-      if(response.data){
-        refetch();
-        toast.success(response.data.message);
-      }
+      const res = await publishCourse({
+        courseId,
+        publish: action, // ✅ correct key (NOT query)
+      }).unwrap(); // ✅ IMPORTANT
+  
+      toast.success(res.message);
+  
+      // ✅ navigate ONLY after success
+      navigate("/admin/course");
     } catch (error) {
-      toast.error("Failed to publish or unpublish course");
+      toast.error(error?.data?.message || "Failed to publish course");
     }
-  }
+  };
 
   useEffect(() => {
     if (isSuccess) {
