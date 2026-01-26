@@ -1,7 +1,12 @@
+// 🔴 MUST be first
+import "dotenv/config";
+
 import express from "express";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
+
 import connectDB from "./database/db.js";
 
 import userRoute from "./routes/user.route.js";
@@ -9,65 +14,75 @@ import courseRoute from "./routes/course.route.js";
 import mediaRoute from "./routes/media.route.js";
 import purchaseRoute from "./routes/purchaseCourse.route.js";
 import courseProgressRoute from "./routes/courseProgress.route.js";
-import path from "path";
 
-dotenv.config({ path: "./.env" }); // root .env
-
-const _dirname = path.resolve();
-
-//dotenv.config();
-
-// ✅ DB connection
+/* =========================
+   DB
+========================= */
 connectDB();
 
+/* =========================
+   APP INIT
+========================= */
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 
-// ✅ BODY PARSERS (REQUIRED)
+/* =========================
+   MIDDLEWARES
+========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(_dirname,"/client/dist"))); // frontend
 
-// ✅ CORS (correct for cookies)
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     credentials: true,
-//   })
-// );
+/* =========================
+   CORS (PRODUCTION SAFE)
+========================= */
 const allowedOrigins = [
-  //"http://localhost:5173",
-  //"http://localhost:8080",
-  //process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:8080",
   "https://lms-r2sm.onrender.com",
 ];
 
-
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://lms-r2sm.onrender.com",
-    ],
+    origin: (origin, cb) => {
+      // ✅ allow server-side, static files, health checks
+      if (!origin) return cb(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return cb(null, true);
+      }
+
+      return cb(null, false); // ❌ DO NOT throw error
+    },
     credentials: true,
   })
 );
-// REQUIRED for preflight
-app.options("*", cors());
 
-// ✅ ROUTES (ALL CORRECTLY MOUNTED)
+/* =========================
+   API ROUTES
+========================= */
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/purchase", purchaseRoute);
 app.use("/api/v1/progress", courseProgressRoute);
 
-app.get('*', (req, res)=>{
-  res.sendFile(path.resolve(_dirname, "client", "dist", "index.html"));
-});
+/* =========================
+   FRONTEND (ONLY IF BUILT)
+========================= */
+const clientDist = path.join(process.cwd(), "client", "dist");
 
-// ✅ SERVER
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
+
+/* =========================
+   SERVER
+========================= */
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
