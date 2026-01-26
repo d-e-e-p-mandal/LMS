@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const COURSE_PROGRESS_API = `${import.meta.env.VITE_API_URL}/api/v1/progress`;
+//const COURSE_PROGRESS_API = `${import.meta.env.VITE_API_URL}/api/v1/progress`;
+const COURSE_PROGRESS_API = `https://lms-deep-project.vercel.app/pi/v1/progress`;
 
 export const courseProgressApi = createApi({
   reducerPath: "courseProgressApi",
