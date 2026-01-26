@@ -43,6 +43,7 @@ const allowedOrigins = [
   //"https://lms-deep-project.vercel.app",
 ];
 
+
 app.use(
   cors({
     origin: (origin, callback) => {
