@@ -46,22 +46,13 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // allow server-to-server / Postman
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("CORS blocked"));
-    },
+    origin: [
+      "http://localhost:5173",
+      "https://lms-r2sm.onrender.com",
+    ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 // REQUIRED for preflight
 app.options("*", cors());
 
