@@ -39,8 +39,8 @@ app.use(express.static(path.join(_dirname,"/client/dist"))); // frontend
 const allowedOrigins = [
   //"http://localhost:5173",
   //"http://localhost:8080",
-  process.env.CLIENT_URL,
-  //"https://lms-deep-project.vercel.app",
+  //process.env.CLIENT_URL,
+  "https://lms-deep-project.vercel.app",
 ];
 
 
