@@ -9,27 +9,60 @@ import courseRoute from "./routes/course.route.js";
 import mediaRoute from "./routes/media.route.js";
 import purchaseRoute from "./routes/purchaseCourse.route.js";
 import courseProgressRoute from "./routes/courseProgress.route.js";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: "./.env" }); // root .env
+
+const _dirname = path.resolve();
+
+//dotenv.config();
 
 // ✅ DB connection
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT;
 
 // ✅ BODY PARSERS (REQUIRED)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.static(path.join(_dirname,"/client/dist"))); // frontend
 
 // ✅ CORS (correct for cookies)
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     credentials: true,
+//   })
+// );
+const allowedOrigins = [
+  //"http://localhost:5173",
+  //"http://localhost:8080",
+  process.env.CLIENT_URL,
+  //"https://lms-deep-project.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      // allow server-to-server / Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS blocked"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// REQUIRED for preflight
+app.options("*", cors());
 
 // ✅ ROUTES (ALL CORRECTLY MOUNTED)
 app.use("/api/v1/user", userRoute);
@@ -37,6 +70,10 @@ app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/purchase", purchaseRoute);
 app.use("/api/v1/progress", courseProgressRoute);
+
+app.get('*', (req, res)=>{
+  res.sendFile(path.resolve(_dirname, "client", "dist", "index.html"));
+});
 
 // ✅ SERVER
 app.listen(PORT, () => {

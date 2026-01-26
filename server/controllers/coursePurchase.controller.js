@@ -4,6 +4,7 @@ import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import { User } from "../models/user.model.js";
 
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /* ================= CREATE CHECKOUT SESSION ================= */
@@ -74,7 +75,7 @@ export const stripeWebhook = async (req, res) => {
     event = stripe.webhooks.constructEvent(
       req.body, // raw body
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.WEBHOOK_ENDPOINT_SECRET
     );
   } catch (error) {
     console.error("WEBHOOK SIGNATURE ERROR:", error.message);
