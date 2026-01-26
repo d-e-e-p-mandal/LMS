@@ -40,7 +40,7 @@ const allowedOrigins = [
   //"http://localhost:5173",
   //"http://localhost:8080",
   //process.env.CLIENT_URL,
-  "https://lms-deep-project.vercel.app",
+  "https://lms-r2sm.onrender.com",
 ];
 
 
