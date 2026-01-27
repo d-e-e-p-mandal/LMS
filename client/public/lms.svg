@@ -1,0 +1,32 @@
+<svg
+  width="200"
+  height="200"
+  viewBox="0 0 200 200"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Background -->
+  <rect width="200" height="200" rx="24" fill="#0f172a"/>
+
+  <!-- Book icon -->
+  <path
+    d="M55 55h45c8 0 15 7 15 15v75H70c-8 0-15-7-15-15V55z"
+    fill="#38bdf8"
+  />
+  <path
+    d="M100 55h45v75c0 8-7 15-15 15h-45V70c0-8 7-15 15-15z"
+    fill="#0ea5e9"
+  />
+
+  <!-- LMS Text -->
+  <text
+    x="100"
+    y="175"
+    text-anchor="middle"
+    font-size="28"
+    font-weight="700"
+    fill="#e5e7eb"
+    font-family="Inter, Arial, sans-serif"
+  >
+    LMS
+  </text>
+</svg>
