@@ -5,8 +5,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 
 import connectDB from "./database/db.js";
 
@@ -19,8 +17,7 @@ import courseProgressRoute from "./routes/courseProgress.route.js";
 /* =========================
    __dirname FIX (ES MODULE)
 ========================= */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const _dirname = path.resolve();
 
 /* =========================
    DB
@@ -51,24 +48,45 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, cb) => {
-      // ✅ Allow server-side, static files, health checks
+    origin: (origin, cb) => {    // origin : true // same site
+      // ✅ Allow requests with NO origin
+      // (server-side, health checks, static files)
       if (!origin) return cb(null, true);
 
-      // ✅ Allow listed origins
+      // ✅ Allow known origins
       if (allowedOrigins.includes(origin)) {
         return cb(null, true);
       }
 
-      // ✅ DO NOT BLOCK — avoids Render crashes
+      // ✅ DO NOT throw error (prevents Render crash)
       return cb(null, true);
     },
+
+    // ✅ Allow cookies / auth headers
     credentials: true,
+
+    // ✅ Allowed HTTP methods
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+
+    // ✅ Allowed request headers
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+
+    // ✅ Headers exposed to frontend
+    exposedHeaders: ["Set-Cookie"],
+
+    // ✅ Cache preflight response
+    maxAge: 86400, // 24 hours
   })
 );
 
-// ✅ Preflight support
+// ✅ REQUIRED for browser preflight (OPTIONS)
 app.options("*", cors());
+
 
 /* =========================
    API ROUTES
