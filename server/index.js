@@ -70,16 +70,11 @@ app.use("/api/v1/progress", courseProgressRoute);
 /* =========================
    FRONTEND (ONLY IF BUILT)
 ========================= */
-const clientDist = path.join(process.cwd(), "client", "dist");
+app.use(express.static(path.join(_dirname, "client", "dist")));
 
-if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(clientDist, "index.html"));
-  });
-}
-
+app.get("*", (req, res) => {
+  res.sendFile(path.join(_dirname, "client", "dist", "index.html"));
+});
 /* =========================
    SERVER
 ========================= */
