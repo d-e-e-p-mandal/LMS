@@ -1,4 +1,6 @@
 # Learning Management System (LMS)
+[Live Link](https://lms-r2sm.onrender.com)
+
 ## Technology Stack & Tools Documentation
 
 This document provides a **complete and structured overview** of the technologies, libraries, and tools used in the development of my **Learning Management System (LMS)** project.  
