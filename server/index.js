@@ -29,6 +29,13 @@ connectDB();
 ========================= */
 const app = express();
 const PORT = process.env.PORT || 8080;
+/* =========================
+   🔥 STRIPE WEBHOOK (MUST BE FIRST)
+========================= */
+app.use(
+   "/api/v1/purchase/webhook",
+   express.raw({ type: "application/json" })
+ );
 
 /* =========================
    MIDDLEWARES
