@@ -14,11 +14,13 @@ import {
   removeLecture,
   getLectureById,
   togglePublishCourse,
+  removeCourse,
 } from "../controllers/course.controller.js";
 
 const router = express.Router();
 
-router.route("/")
+router
+  .route("/")
   .get(isAuthenticated, getCreatorCourses)
   .post(isAuthenticated, createCourse);
 
@@ -28,8 +30,9 @@ router.get("/published-courses", getPublishedCourse);
 router
   .route("/:courseId")
   .get(isAuthenticated, getCourseById)
-  .put(isAuthenticated, upload.single("thumbnail"), editCourse) // ✅ FIX
-  .patch(isAuthenticated, togglePublishCourse);
+  .put(isAuthenticated, upload.single("thumbnail"), editCourse)
+  .patch(isAuthenticated, togglePublishCourse)
+  .delete(isAuthenticated, removeCourse); // ✅ FIXED
 
 router
   .route("/:courseId/lecture")

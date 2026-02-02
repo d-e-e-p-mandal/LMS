@@ -224,6 +224,50 @@ export const getCourseById = async (req, res) => {
   }
 };
 
+/* ================= DELETE COURSE ================= */
+export const removeCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await Course.findById(courseId).populate("lectures");
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    // delete lecture videos
+    for (const lecture of course.lectures) {
+      if (lecture.publicId) {
+        await deleteVideoFromCloudinary(lecture.publicId);
+      }
+      await Lecture.findByIdAndDelete(lecture._id);
+    }
+
+    // delete course thumbnail
+    if (course.courseThumbnail) {
+      const publicId =
+        "lms/course/thumbnails/" +
+        course.courseThumbnail.split("/").pop().split(".")[0];
+      await deleteMediaFromCloudinary(publicId);
+    }
+
+    await Course.findByIdAndDelete(courseId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Course removed successfully",
+    });
+  } catch (error) {
+    console.error("DELETE COURSE ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove course",
+    });
+  }
+};
+
 /* ================= CREATE LECTURE ================= */
 export const createLecture = async (req, res) => {
   try {

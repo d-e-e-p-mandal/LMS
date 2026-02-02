@@ -145,6 +145,20 @@ export const courseApi = createApi({
         { type: "Course", id: courseId },
       ],
     }),
+
+    /* ================= DELETE COURSE (✅ ADDED) ================= */
+    removeCourse: builder.mutation({
+      query: (courseId) => ({
+        url: `/${courseId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        "CreatorCourse",
+        "PublishedCourse",
+        "Course",
+      ],
+    }),
+
   }),
 });
 
@@ -161,4 +175,5 @@ export const {
   useRemoveLectureMutation,
   useGetLectureByIdQuery,
   usePublishCourseMutation,
+  useRemoveCourseMutation, // ✅ ADDED
 } = courseApi;
