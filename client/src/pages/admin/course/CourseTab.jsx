@@ -22,6 +22,7 @@ import {
   useEditCourseMutation,
   useGetCourseByIdQuery,
   usePublishCourseMutation,
+  useRemoveCourseMutation, // ✅ ADDED
 } from "@/features/api/courseApi";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -48,6 +49,7 @@ const CourseTab = () => {
   const [publishCourse] = usePublishCourseMutation();
   const [editCourse, { data, isLoading, isSuccess, error }] =
     useEditCourseMutation();
+  const [removeCourse] = useRemoveCourseMutation(); // ✅ ADDED
 
   const navigate = useNavigate();
   const [previewThumbnail, setPreviewThumbnail] = useState("");
@@ -90,7 +92,6 @@ const CourseTab = () => {
     }
   };
 
-  /* ================= FIXED HERE ================= */
   const updateCourseHandler = async () => {
     const formData = new FormData();
 
@@ -101,14 +102,12 @@ const CourseTab = () => {
     formData.append("courseLevel", input.courseLevel);
     formData.append("coursePrice", input.coursePrice);
 
-    // ✅ MUST be "thumbnail"
     if (input.courseThumbnail) {
       formData.append("thumbnail", input.courseThumbnail);
     }
 
     await editCourse({ formData, courseId });
   };
-  /* ================= END FIX ================= */
 
   const publishStatusHandler = async (action) => {
     try {
@@ -121,6 +120,16 @@ const CourseTab = () => {
       navigate("/admin/course");
     } catch (err) {
       toast.error(err?.data?.message || "Failed to publish course");
+    }
+  };
+
+  const removeCourseHandler = async () => { // ✅ ADDED
+    try {
+      await removeCourse(courseId).unwrap();
+      toast.success("Course deleted successfully");
+      navigate("/admin/course");
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to delete course");
     }
   };
 
@@ -156,7 +165,10 @@ const CourseTab = () => {
           >
             {courseByIdData?.course.isPublished ? "Unpublished" : "Publish"}
           </Button>
-          <Button>Remove Course</Button>
+
+          <Button variant="destructive" onClick={removeCourseHandler}>
+            Remove Course
+          </Button>
         </div>
       </CardHeader>
 
