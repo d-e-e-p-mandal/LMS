@@ -41,8 +41,8 @@ export const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `http://localhost:5173/course-progress/${courseId}`,
-      cancel_url: `http://localhost:5173/course-detail/${courseId}`,
+      success_url: `https://lms-r2sm.onrender.com/course-progress/${courseId}`,
+      cancel_url: `https://lms-r2sm.onrender.com/course-detail/${courseId}`,
       metadata: {
         courseId,
         userId,

@@ -10,8 +10,8 @@ const fileFilter = (req, file, cb) => {
     "image/png",
     "image/jpg",
     "video/mp4",
-    "video/mkv",
     "video/webm",
+    "video/x-matroska", // ✅ FIX
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
