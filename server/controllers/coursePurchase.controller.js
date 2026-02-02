@@ -4,7 +4,6 @@ import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import { User } from "../models/user.model.js";
 
-
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /* ================= CREATE CHECKOUT SESSION ================= */
@@ -16,6 +15,18 @@ export const createCheckoutSession = async (req, res) => {
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ message: "Course not found!" });
+    }
+
+    // 🔐 FIX: prevent duplicate / pending purchase
+    const existingPurchase = await CoursePurchase.findOne({
+      userId,
+      courseId,
+      status: { $in: ["pending", "completed"] },
+    });
+    if (existingPurchase) {
+      return res.status(400).json({
+        message: "Course already purchased or payment in progress",
+      });
     }
 
     const newPurchase = new CoursePurchase({
@@ -73,7 +84,7 @@ export const stripeWebhook = async (req, res) => {
     const sig = req.headers["stripe-signature"];
 
     event = stripe.webhooks.constructEvent(
-      req.body, // raw body
+      req.body,
       sig,
       process.env.WEBHOOK_ENDPOINT_SECRET
     );
@@ -86,12 +97,22 @@ export const stripeWebhook = async (req, res) => {
     try {
       const session = event.data.object;
 
+      // 🔐 FIX: ensure payment is successful
+      if (session.payment_status !== "paid") {
+        return res.status(200).json({ received: true });
+      }
+
       const purchase = await CoursePurchase.findOne({
         paymentId: session.id,
       }).populate("courseId");
 
       if (!purchase) {
         return res.status(404).json({ message: "Purchase not found" });
+      }
+
+      // 🔐 FIX: idempotency (Stripe retries)
+      if (purchase.status === "completed") {
+        return res.status(200).json({ received: true });
       }
 
       purchase.status = "completed";
@@ -143,7 +164,6 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
 
     const isCreator = course.creator._id.toString() === userId;
 
-    // ✅ Creator is NEVER treated as purchased
     let purchased = false;
 
     if (!isCreator) {
@@ -171,9 +191,11 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
 };
 
 /* ================= GET ALL PURCHASED COURSES ================= */
-export const getAllPurchasedCourse = async (_, res) => {
+export const getAllPurchasedCourse = async (req, res) => {
   try {
+    // 🔐 FIX: return only logged-in user's purchases
     const purchasedCourse = await CoursePurchase.find({
+      userId: req.id,
       status: "completed",
     }).populate("courseId");
 
