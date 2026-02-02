@@ -29,10 +29,10 @@ const CourseDetail = () => {
   console.log(purchased);
 
   const handleContinueCourse = () => {
-    if(purchased){
-      navigate(`/course-progress/${courseId}`)
+    if (purchased) {
+      navigate(`/course-progress/${courseId}`);
     }
-  }
+  };
 
   return (
     <div className="space-y-5">
@@ -55,6 +55,7 @@ const CourseDetail = () => {
           <p>Students enrolled: {course?.enrolledStudents.length}</p>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto my-5 px-4 md:px-8 flex flex-col lg:flex-row justify-between gap-10">
         <div className="w-full lg:w-1/2 space-y-5">
           <h1 className="font-bold text-xl md:text-2xl">Description</h1>
@@ -79,13 +80,14 @@ const CourseDetail = () => {
             </CardContent>
           </Card>
         </div>
+
         <div className="w-full lg:w-1/3">
           <Card>
             <CardContent className="p-4 flex flex-col">
               <div className="w-full aspect-video mb-4">
                 <ReactPlayer
                   width="100%"
-                  height={"100%"}
+                  height="100%"
                   url={course.lectures[0].videoUrl}
                   controls={true}
                 />
@@ -94,11 +96,20 @@ const CourseDetail = () => {
               <Separator className="my-2" />
               <h1 className="text-lg md:text-xl font-semibold">Course Price</h1>
             </CardContent>
+
             <CardFooter className="flex justify-center p-4">
               {purchased ? (
-                <Button onClick={handleContinueCourse} className="w-full">Continue Course</Button>
+                <Button
+                  onClick={handleContinueCourse}
+                  className="w-full"
+                >
+                  Continue Course
+                </Button>
               ) : (
-                <BuyCourseButton courseId={courseId} />
+                <BuyCourseButton
+                  courseId={courseId}
+                  purchased={purchased}
+                />
               )}
             </CardFooter>
           </Card>
