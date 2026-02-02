@@ -1,13 +1,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const COURSE_API=`${import.meta.env.VITE_API_URL}/api/v1/course`;
-//const COURSE_API=`https://lms-r2sm.onrender.com/api/v1/course`;
+//const COURSE_API=`${import.meta.env.VITE_API_URL}/api/v1/course`;
+const COURSE_API = `https://lms-r2sm.onrender.com/api/v1/course`;
 
 export const courseApi = createApi({
   reducerPath: "courseApi",
+
   baseQuery: fetchBaseQuery({
     baseUrl: COURSE_API,
-    credentials: "include", // ✅ required for cookies
+    credentials: "include", // kept as-is
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token"); // ✅ ADD
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
 
   tagTypes: [
@@ -100,7 +108,7 @@ export const courseApi = createApi({
       query: ({ courseId, lectureId, formData }) => ({
         url: `/${courseId}/lecture/${lectureId}`,
         method: "PUT",
-        body: formData, // ✅ FormData (video)
+        body: formData,
       }),
       invalidatesTags: (r, e, { courseId, lectureId }) => [
         { type: "Lecture", id: courseId },

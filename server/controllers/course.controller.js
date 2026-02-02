@@ -143,7 +143,8 @@ export const editCourse = async (req, res) => {
 
     let courseThumbnail = course.courseThumbnail;
 
-    if (thumbnail) {
+    /* ===== FIX START ===== */
+    if (thumbnail && thumbnail.buffer) {
       if (course.courseThumbnail) {
         const publicId =
           "lms/course/thumbnails/" +
@@ -159,6 +160,7 @@ export const editCourse = async (req, res) => {
       );
       courseThumbnail = uploaded.secure_url;
     }
+    /* ===== FIX END ===== */
 
     const updatePayload = {
       courseTitle,
@@ -300,7 +302,8 @@ export const editLecture = async (req, res) => {
 
     if (lectureTitle) lecture.lectureTitle = lectureTitle;
 
-    if (videoFile) {
+    /* ===== FIX START ===== */
+    if (videoFile && videoFile.buffer) {
       if (lecture.publicId) {
         await deleteVideoFromCloudinary(lecture.publicId);
       }
@@ -314,8 +317,8 @@ export const editLecture = async (req, res) => {
       lecture.videoUrl = uploaded.secure_url;
       lecture.publicId = uploaded.public_id;
     }
+    /* ===== FIX END ===== */
 
-    /* ✅ CRITICAL FIX */
     if (isPreviewFree !== undefined) {
       lecture.isPreviewFree =
         isPreviewFree === "true" || isPreviewFree === true;
