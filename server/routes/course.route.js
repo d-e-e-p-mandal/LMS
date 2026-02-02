@@ -28,7 +28,7 @@ router.get("/published-courses", getPublishedCourse);
 router
   .route("/:courseId")
   .get(isAuthenticated, getCourseById)
-  .put(isAuthenticated, upload.single("courseThumbnail"), editCourse)
+  .put(isAuthenticated, upload.single("thumbnail"), editCourse) // ✅ FIX
   .patch(isAuthenticated, togglePublishCourse);
 
 router

@@ -145,16 +145,17 @@ export const editCourse = async (req, res) => {
 
     if (thumbnail) {
       if (course.courseThumbnail) {
-        const publicId = course.courseThumbnail
-          .split("/")
-          .pop()
-          .split(".")[0];
+        const publicId =
+          "lms/course/thumbnails/" +
+          course.courseThumbnail.split("/").pop().split(".")[0];
+
         await deleteMediaFromCloudinary(publicId);
       }
 
       const uploaded = await uploadMedia(
-        thumbnail.path,
-        "lms/course/thumbnails"
+        thumbnail.buffer,
+        "lms/course/thumbnails",
+        thumbnail.mimetype
       );
       courseThumbnail = uploaded.secure_url;
     }
@@ -305,8 +306,9 @@ export const editLecture = async (req, res) => {
       }
 
       const uploaded = await uploadMedia(
-        videoFile.path,
-        "lms/course/lectures"
+        videoFile.buffer,
+        "lms/course/lectures",
+        videoFile.mimetype
       );
 
       lecture.videoUrl = uploaded.secure_url;
