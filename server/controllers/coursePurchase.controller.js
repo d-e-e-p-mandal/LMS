@@ -52,7 +52,7 @@ export const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `https://lms-r2sm.onrender.com/course-progress/${courseId}`,
+      success_url: `https://lms-r2sm.onrender.com/course-detail/${courseId}`,
       cancel_url: `https://lms-r2sm.onrender.com/course-detail/${courseId}`,
       metadata: {
         courseId,
