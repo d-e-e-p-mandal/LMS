@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const PURCHASE_API =`https://lms-r2sm.onrender.com/api/v1/purchase`;
+const PURCHASE_API = "https://lms-r2sm.onrender.com/api/v1/purchase";
 
 export const purchaseApi = createApi({
   reducerPath: "purchaseApi",
@@ -11,13 +11,15 @@ export const purchaseApi = createApi({
   tagTypes: ["Purchases"],
 
   endpoints: (builder) => ({
+
     // ================= CREATE CHECKOUT SESSION =================
     createCheckoutSession: builder.mutation({
       query: (courseId) => ({
-        url: "checkout/create-checkout-session",
+        url: "/checkout/create-checkout-session",
         method: "POST",
         body: { courseId },
       }),
+      invalidatesTags: ["Purchases"], // ✅ IMPORTANT
     }),
 
     // ================= GET PURCHASED COURSES =================
